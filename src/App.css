@@ -1,45 +1,45 @@
-/* App.css */
 
-/* Make sure the body takes up full height */
 body, html {
   height: 100%;
   margin: 0;
   font-family: Arial, sans-serif;
 }
 
-/* Container to center everything */
 .app-container {
   display: flex;
-  justify-content: center;    /* Horizontal center */
-  align-items: center;        /* Vertical center */
-  height: 100%;                /* Full height */
-  background-color: #f4f4f9;  /* Light background color */
+  justify-content: center;  
+  align-items: center;      
+  height: 100%;             
+  background-color: #f4f4f9;  
+  padding: 20px;             
 }
 
-/* Main content container */
 .content {
-  text-align: center;         /* Center all text inside content */
-  background-color: white;    /* White background for the content */
-  padding: 20px;
-  border-radius: 8px;         /* Rounded corners */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Light shadow */
+  text-align: center;        
+  background-color: white;   
+  padding: 30px;            
+  border-radius: 10px;       
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
   width: 90%;
-  max-width: 600px;           /* Limit the width */
+  max-width: 600px;           
+  margin-bottom: 20px;      
 }
 
 h1 {
-  font-size: 24px;
+  font-size: 28px;     
   color: #333;
+  margin-bottom: 20px;       
 }
 
 button {
   background-color: #4CAF50;
   color: white;
-  padding: 10px 20px;
+  padding: 12px 24px;       
   border: none;
   border-radius: 5px;
   cursor: pointer;
   margin-top: 20px;
+  margin-bottom: 10px;      
 }
 
 button:hover {
@@ -48,9 +48,15 @@ button:hover {
 
 input[type="file"] {
   margin-top: 20px;
+  margin-bottom: 20px;       
 }
 
 img {
   margin-top: 20px;
+  margin-bottom: 20px;       
   border-radius: 5px;
+}
+
+section {
+  margin-top: 30px;
 }
