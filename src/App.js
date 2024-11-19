@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import './App.css';  // Assuming you are creating a separate CSS file for styling
+import './App.css';
 
 const App = () => {
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [predictions, setPredictions] = useState([]);
+    const [vggPredictions, setVggPredictions] = useState([]);
+    const [gradCamPath, setGradCamPath] = useState(null); // Grad-CAM Path
     const [info, setInfo] = useState({});
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -29,18 +30,21 @@ const App = () => {
             });
 
             if (!response.ok) {
-                throw new Error("Network response was not ok");
+                throw new Error('Network response was not ok');
             }
 
             const result = await response.json();
-            setPredictions(result.predictions);
+
+            // Handling response structure
+            setVggPredictions(result.predictions || []);
+            setGradCamPath(result.grad_cam_path || null); // Save Grad-CAM path
             setInfo({
                 label: result.top_label,
                 summary: result.summary,
-                wiki_url: result.wiki_url
+                wiki_url: result.wiki_url,
             });
         } catch (error) {
-            console.error("Error fetching data:", error);
+            console.error('Error fetching data:', error);
             setErrorMessage("Sorry, we couldn't process the image. Please try again.");
         } finally {
             setLoading(false);
@@ -50,28 +54,53 @@ const App = () => {
     return (
         <div className="app-container">
             <div className="content">
-                <h1>Object Identification with Grad-CAM</h1>
+                <h1>-Object Classifier-</h1>
                 <input type="file" onChange={handleImageChange} />
-                {preview && <img src={preview} alt="Image Preview" style={{ maxWidth: "300px" }} />}
-                
+                {preview && <img src={preview} alt="Image Preview" style={{ maxWidth: '300px' }} />}
+
                 {loading ? (
                     <p>Analyzing image...</p>
                 ) : (
                     <button onClick={handlePredict}>Submit</button>
                 )}
 
-                {predictions.length > 0 && (
+                {vggPredictions.length > 0 && (
                     <div>
-                        <h2>Predictions:</h2>
-                        {predictions.map((pred, index) => (
+                        <h2>VGG16 Predictions:</h2>
+                        {vggPredictions.map((pred, index) => (
                             <div key={index} style={{ marginBottom: '8px' }}>
                                 <strong>{pred.label}</strong>
-                                <div style={{ backgroundColor: '#ddd', width: '100%', height: '10px', borderRadius: '4px', overflow: 'hidden' }}>
-                                    <div style={{ backgroundColor: '#4caf50', width: `${pred.confidence * 100}%`, height: '100%' }}></div>
-                                </div>
+                                <div
+                                    style={{
+                                        backgroundColor: '#ddd',
+                                        width: '100%',
+                                        height: '10px',
+                                        borderRadius: '4px',
+                                        overflow: 'hidden',
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            backgroundColor: '#4caf50',
+                                            width: `${pred.confidence * 100}%`, // Correct string interpolation
+                                            height: '100%',
+                                        }}
+                                    ></div>
+                                </div><br></br>
                                 <span>{Math.round(pred.confidence * 100)}% confidence</span>
                             </div>
                         ))}
+                    </div>
+                )}
+
+                {gradCamPath && (
+                    <div> <br></br>
+                        <h2>Grad-CAM Heatmap:</h2>
+                        <img
+                            src={`http://localhost:5000/${gradCamPath}`} // Ensure correct path
+                            alt="Grad-CAM Heatmap"
+                            style={{ maxWidth: '300px' }}
+                        />
                     </div>
                 )}
 
@@ -81,7 +110,11 @@ const App = () => {
                     <div>
                         <h3>Top Prediction: {info.label}</h3>
                         <p>{info.summary}</p>
-                        {info.wiki_url && <a href={info.wiki_url} target="_blank" rel="noopener noreferrer">Read more on Wikipedia</a>}
+                        {info.wiki_url && (
+                            <a href={info.wiki_url} target="_blank" rel="noopener noreferrer">
+                                Read more on Wikipedia
+                            </a>
+                        )}
                     </div>
                 )}
             </div>
