@@ -7,6 +7,7 @@ const App = () => {
     const [loading, setLoading] = useState(false);
     const [vggPredictions, setVggPredictions] = useState([]);
     const [gradCamPath, setGradCamPath] = useState(null); // Grad-CAM Path
+    const [predictionGraph, setPredictionGraph] = useState(null); // Prediction Graph Base64
     const [info, setInfo] = useState({});
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -14,12 +15,14 @@ const App = () => {
         const file = e.target.files[0];
         setImage(file);
         setPreview(URL.createObjectURL(file));
+        setErrorMessage(''); // Clear previous errors
     };
 
     const handlePredict = async () => {
         if (!image) return;
 
         setLoading(true);
+        setErrorMessage(''); // Clear previous errors
         const formData = new FormData();
         formData.append('image', image);
 
@@ -30,7 +33,7 @@ const App = () => {
             });
 
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error('Failed to process the image. Please try again.');
             }
 
             const result = await response.json();
@@ -38,6 +41,7 @@ const App = () => {
             // Handling response structure
             setVggPredictions(result.predictions || []);
             setGradCamPath(result.grad_cam_path || null); // Save Grad-CAM path
+            setPredictionGraph(result.prediction_graph || null); // Save Prediction Graph
             setInfo({
                 label: result.top_label,
                 summary: result.summary,
@@ -54,14 +58,16 @@ const App = () => {
     return (
         <div className="app-container">
             <div className="content">
-                <h1>-Object Classifier-</h1>
+                <h1>Object Classifier</h1>
                 <input type="file" onChange={handleImageChange} />
-                {preview && <img src={preview} alt="Image Preview" style={{ maxWidth: '300px' }} />}
+                {preview && <img src={preview} alt="Image Preview" style={{ maxWidth: '300px', margin: '20px 0' }} />}
 
                 {loading ? (
                     <p>Analyzing image...</p>
                 ) : (
-                    <button onClick={handlePredict}>Submit</button>
+                    <button onClick={handlePredict} disabled={loading}>
+                        Submit
+                    </button>
                 )}
 
                 {vggPredictions.length > 0 && (
@@ -82,11 +88,11 @@ const App = () => {
                                     <div
                                         style={{
                                             backgroundColor: '#4caf50',
-                                            width: `${pred.confidence * 100}%`, // Correct string interpolation
+                                            width: `${pred.confidence * 100}%`,
                                             height: '100%',
                                         }}
                                     ></div>
-                                </div><br></br>
+                                </div>
                                 <span>{Math.round(pred.confidence * 100)}% confidence</span>
                             </div>
                         ))}
@@ -94,12 +100,23 @@ const App = () => {
                 )}
 
                 {gradCamPath && (
-                    <div> <br></br>
+                    <div>
                         <h2>Grad-CAM Heatmap:</h2>
                         <img
-                            src={`http://localhost:5000/${gradCamPath}`} // Ensure correct path
+                            src={`http://localhost:5000/${gradCamPath}`}
                             alt="Grad-CAM Heatmap"
-                            style={{ maxWidth: '300px' }}
+                            style={{ maxWidth: '300px', margin: '20px 0' }}
+                        />
+                    </div>
+                )}
+
+                {predictionGraph && (
+                    <div>
+                        <h2>Prediction Graph:</h2>
+                        <img
+                            src={`data:image/png;base64,${predictionGraph}`}
+                            alt="Prediction Graph"
+                            style={{ maxWidth: '300px', margin: '20px 0' }}
                         />
                     </div>
                 )}
